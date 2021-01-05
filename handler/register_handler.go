@@ -72,6 +72,9 @@ func RegisterHandlerPost(w http.ResponseWriter, r *http.Request) {
 		responsesMap["status"] = "true"
 	}
 
+	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+	
 	encodeResponses, _ := json.Marshal(responsesMap)
 	library.ResponseByCode(200, w, string(encodeResponses))
 }
