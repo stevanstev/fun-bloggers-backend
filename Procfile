@@ -1,1 +1,1 @@
-web: currency
+web: fun-blogger-backend
