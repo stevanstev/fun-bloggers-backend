@@ -1,0 +1,24 @@
+package handler
+
+import (
+	"fmt"
+	"net/http"
+	"encoding/json"
+	models "fun-blogger-backend/model"
+	library "fun-blogger-backend/library"
+)
+
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	response := models.BaseResponse{}
+	response.GetDefault("Index Api Ready")
+
+	w.Header().Add("Content-Type", "application/json")
+	httpResponse , err := json.Marshal(response)
+
+	if(err != nil) {
+		library.ResponseByCode(500, w, err.Error())
+		return 
+	}
+
+	fmt.Fprint(w, string(httpResponse))
+}

@@ -1,0 +1,18 @@
+package main 
+
+import (
+	"fmt"
+	"net/http"
+	"log"
+	routes "fun-blogger-backend/routes"
+)
+
+func serve(mux http.Handler) {
+	fmt.Println("Server Running on Port: 8009")
+	log.Fatal(http.ListenAndServe(":8009", mux))
+}
+
+func main() {
+	mux := routes.Routing();
+	serve(mux)
+}
