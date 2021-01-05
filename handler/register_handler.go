@@ -59,6 +59,7 @@ func RegisterHandlerPost(w http.ResponseWriter, r *http.Request) {
 		model.Id = primitive.NewObjectID()
 		model.CreatedAt = library.GetCurrentDate()
 		model.UpdatedAt = library.GetCurrentDate()
+		model.Password, _ = library.Encrypt([]byte(password))
 
 		// Insert model to users table
 		err = driver.Insert("users", model)
