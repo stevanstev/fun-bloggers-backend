@@ -1,12 +1,13 @@
-package main 
+package main
 
 import (
 	"fmt"
-	"net/http"
-	"log"
-	"os"
-	"github.com/gorilla/handlers"
 	routes "fun-blogger-backend/routes"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/gorilla/handlers"
 )
 
 func serve(mux http.Handler) {
@@ -19,6 +20,6 @@ func serve(mux http.Handler) {
 }
 
 func main() {
-	mux := routes.Routing();
+	mux := routes.Routing()
 	serve(mux)
 }

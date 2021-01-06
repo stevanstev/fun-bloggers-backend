@@ -3,41 +3,43 @@ package library
 import (
 	"crypto/hmac"
 	"crypto/sha256"
-	"strings"
-	"encoding/json"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
+	"strings"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type JWTHeader struct {
+type jwtHeader struct {
 	Type string `json:"type"`
 	Algo string `json:"algo"`
 }
 
-/*
-	GenerateBase64
+/*GenerateBase64 ...
+@desc Convert payload of type interface to Base64 String format
 */
-func GenerateBase64(p interface{}) string {
-	je, _ := json.Marshal(p)
+func GenerateBase64(payload interface{}) string {
+	jsonEncode, _ := json.Marshal(payload)
 
-	stringEncoded := base64.StdEncoding.EncodeToString(je)
+	stringEncoded := base64.StdEncoding.EncodeToString(jsonEncode)
 
-	sp := StringReplace(string(stringEncoded))
+	sp := stringReplace(string(stringEncoded))
 
 	return sp
 }
 
-/*
-	@model interface{}, struct of model
-	@modelId primitive.ObjectID, model Id
+/*Sign ...
+@param model interface{}, struct of model
+@param modelId primitive.ObjectID, model Id
+@desc sign payload to jwt token
 */
-func Sign(model interface{}, modelId primitive.ObjectID) string {
+func Sign(model interface{}, modelID primitive.ObjectID) string {
 	jwtBody := GenerateBase64(model)
-	header := JWTHeader{"jwt", "HSH256"}
+	header := jwtHeader{"jwt", "HSH256"}
 	jwtHeader := GenerateBase64(header)
 	payload := jwtHeader + "." + jwtBody
-	signature := JWTSignature(modelId.String(), payload)
+	signature := jwtSignature(modelID.String(), payload)
 
 	return signature
 }
@@ -47,7 +49,7 @@ func Sign(model interface{}, modelId primitive.ObjectID) string {
 	@uid string, user ID
 	@p string, JWT Payload
 */
-func JWTSignature(uid string, p string) string {
+func jwtSignature(uid string, p string) string {
 	h := hmac.New(sha256.New, []byte(uid))
 
 	h.Write([]byte(p))
@@ -62,7 +64,7 @@ func JWTSignature(uid string, p string) string {
 /*
 	StringReplace replace special char
 */
-func StringReplace(s string) string {
+func stringReplace(s string) string {
 	replace := strings.NewReplacer("=", "", "+", "-", "/", "_")
 
 	return replace.Replace(s)

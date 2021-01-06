@@ -1,10 +1,13 @@
 package library
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
+/*GetCurrentDate ...
+@desc Get current date with format of YYYY-MM-DD HH:II:SS
+*/
 func GetCurrentDate() string {
 	dt := time.Now()
 	currentDate := fmt.Sprintf("%v-%v-%v %v:%v:%v", dt.Year(), monthMapping(dt.Month()), singleValueMapping(dt.Day()), singleValueMapping(dt.Hour()), singleValueMapping(dt.Minute()), singleValueMapping(dt.Second()))
@@ -15,7 +18,7 @@ func GetCurrentDate() string {
 	Convert single value to formatted string with 0 prefix
 */
 func singleValueMapping(value int) string {
-	if (value < 10) {
+	if value < 10 {
 		return fmt.Sprintf("0%v", value)
 	}
 
