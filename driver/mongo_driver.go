@@ -141,6 +141,37 @@ func FindTokens(query map[string]interface{}) ([]models.Token, error) {
 	return result, nil
 }
 
+/*FindRelations ...
+@param query bson.M{}
+*/
+func FindRelations(query map[string]interface{}) ([]models.Relations, error) {
+	db, err := connect()
+	if err != nil {
+		return nil, err
+	}
+
+	cursor, err := db.Collection("relations").Find(ctx, query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+
+	result := make([]models.Relations, 0)
+	for cursor.Next(ctx) {
+		var row models.Relations
+		err := cursor.Decode(&row)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, row)
+	}
+
+	return result, nil
+}
+
 /*GetUserIDByToken ...
 @desc find user id by token value
 @param token, token header

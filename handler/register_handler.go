@@ -86,6 +86,17 @@ func RegisterHandlerPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			// Create new relation data with empty FollowedList and BlockedList
+			var relations models.Relations
+			relations.ID = primitive.NewObjectID()
+			relations.UserID = user.ID
+			relations.FollowedList = []primitive.ObjectID{}
+			relations.BlockedList = []primitive.ObjectID{}
+			relations.CreatedAt = library.GetCurrentDate()
+			relations.UpdatedAt = library.GetCurrentDate()
+
+			err = driver.Insert("relations", relations)
+
 			responsesMap["status"] = "true"
 		}
 	}

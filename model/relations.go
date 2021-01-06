@@ -1,6 +1,9 @@
 package model
 
 import (
+	"encoding/json"
+	"net/http"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -9,11 +12,28 @@ import (
 */
 type Relations struct {
 	ID     primitive.ObjectID `bson:"_id" json:"_id"`
-	UserID string             `bson:"userID" json:"userID"`
+	UserID primitive.ObjectID `bson:"userID" json:"userID"`
 	// List of Followed users ID
-	FollowedList string `bson:"followedList" json:"followedList"`
+	FollowedList []primitive.ObjectID `bson:"followedList" json:"followedList"`
 	// List of Blocked users ID
-	BlockedList string `bson:"blockedList" json:"blockedList"`
-	CreatedAt   string `bson:"createdAt" json:"createdAt"`
-	UpdatedAt   string `bson:"updatedAt" json:"updatedAt"`
+	BlockedList []primitive.ObjectID `bson:"blockedList" json:"blockedList"`
+	CreatedAt   string               `bson:"createdAt" json:"createdAt"`
+	UpdatedAt   string               `bson:"updatedAt" json:"updatedAt"`
+}
+
+/*FromJSON ...
+@desc decode request json to Blog struct
+*/
+func (relations *Relations) FromJSON(r *http.Request) error {
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(relations)
+
+	return err
+}
+
+/*ToJSON ...
+@desc encode Blog struct to JSON
+*/
+func (relations *Relations) ToJSON() string {
+	return "hello"
 }

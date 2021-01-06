@@ -16,9 +16,11 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		// Which path required to using auth middleware
 		var pathList = map[string]bool{
-			"/login":    false,
-			"/register": false,
-			"/blog":     true,
+			"/login":              false,
+			"/register":           false,
+			"/blog":               true,
+			"/relations":          true,
+			"/relations/followed": true,
 		}
 
 		if reqToken == "" && pathList[reqPath] == true {

@@ -30,5 +30,10 @@ func Routing() http.Handler {
 	router.HandleFunc("/blog", handler.BlogHandlerGet).Methods("GET")
 	router.HandleFunc("/blog", handler.BlogHandlerPost).Methods("POST")
 
+	// Relations Routes
+	router.HandleFunc("/relations", handler.RelationsHandlerGet).Methods("GET")
+	router.HandleFunc("/relations/followed", handler.RelationsFollowedHandlerGet).Methods("GET")
+	router.HandleFunc("/relations/blocked", handler.RelationsBlockedHandlerGet).Methods("GET")
+
 	return router
 }
