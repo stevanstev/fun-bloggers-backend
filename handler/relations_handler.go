@@ -17,6 +17,8 @@ import (
 @access Private
 */
 func RelationsHandlerGet(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+
 	reqToken := r.Header.Get("x-auth-token")
 	userID := driver.GetUserIDByToken(reqToken)
 
@@ -33,9 +35,6 @@ func RelationsHandlerGet(w http.ResponseWriter, r *http.Request) {
 	responsesMap["followedUserCount"] = followedUserCount
 	responsesMap["blockedUserCount"] = blockedUserCount
 
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-
 	encodeResponses, _ := json.Marshal(responsesMap)
 	library.ResponseByCode(200, w, string(encodeResponses))
 }
@@ -47,6 +46,8 @@ func RelationsHandlerGet(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func RelationsFollowedHandlerGet(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+
 	reqToken := r.Header.Get("x-auth-token")
 	userID := driver.GetUserIDByToken(reqToken)
 
@@ -73,9 +74,6 @@ func RelationsFollowedHandlerGet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-
 	encodeResponses, _ := json.Marshal(responsesMap)
 	library.ResponseByCode(200, w, string(encodeResponses))
 }
@@ -87,6 +85,8 @@ func RelationsFollowedHandlerGet(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func RelationsBlockedHandlerGet(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+
 	reqToken := r.Header.Get("x-auth-token")
 	userID := driver.GetUserIDByToken(reqToken)
 
@@ -112,9 +112,6 @@ func RelationsBlockedHandlerGet(w http.ResponseWriter, r *http.Request) {
 			BlockedUserResult = append(BlockedUserResult, user[0])
 		}
 	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	encodeResponses, _ := json.Marshal(responsesMap)
 	library.ResponseByCode(200, w, string(encodeResponses))

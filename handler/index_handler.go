@@ -15,10 +15,11 @@ import (
 @access Public
 */
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+
 	response := models.BaseResponse{}
 	response.GetDefault("Index Api Ready")
 
-	w.Header().Add("Content-Type", "application/json")
 	httpResponse, err := json.Marshal(response)
 
 	if err != nil {

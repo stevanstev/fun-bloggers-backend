@@ -18,6 +18,8 @@ import (
 @access Private
 */
 func BlogHandlerGet(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+
 	reqToken := r.Header.Get("x-auth-token")
 	var responsesMap = map[string]string{}
 
@@ -35,9 +37,6 @@ func BlogHandlerGet(w http.ResponseWriter, r *http.Request) {
 
 	encodedResponses, _ := json.Marshal(responsesMap)
 
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-
 	library.ResponseByCode(200, w, string(encodedResponses))
 }
 
@@ -48,6 +47,8 @@ func BlogHandlerGet(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func BlogHandlerPost(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+	
 	var blog models.Blog
 	err := blog.FromJSON(r)
 
@@ -86,9 +87,6 @@ func BlogHandlerPost(w http.ResponseWriter, r *http.Request) {
 
 		responsesMap["status"] = "true"
 	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	encodeResponses, _ := json.Marshal(responsesMap)
 	library.ResponseByCode(200, w, string(encodeResponses))

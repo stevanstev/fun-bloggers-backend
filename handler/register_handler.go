@@ -10,6 +10,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"regexp"
 )
 
 /*RegisterHandlerGet ...
@@ -19,10 +20,11 @@ import (
 @access Public
 */
 func RegisterHandlerGet(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+	
 	response := models.BaseResponse{}
 	response.GetDefault("Register Api Ready")
 
-	w.Header().Add("Content-Type", "application/json")
 	httpResponse, err := json.Marshal(response)
 
 	if err != nil {
@@ -40,10 +42,21 @@ func RegisterHandlerGet(w http.ResponseWriter, r *http.Request) {
 @access Public
 */
 func RegisterHandlerPost(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+	
 	var user models.User
 	err := user.FromJSON(r)
+	var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 	var responsesMap = map[string]string{}
+
+	isEmailValid := func(e string) bool {
+		if len(e) < 3 && len(e) > 254 {
+			return false
+		}
+		return emailRegex.MatchString(e)
+	}
+
 
 	if err != nil {
 		library.ResponseByCode(500, w, err.Error())
@@ -51,7 +64,13 @@ func RegisterHandlerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.Email == "" {
-		responsesMap["email"] = "Email cannot be Empty"
+		responsesMap["email"] = "Email cannot be Empty"	
+	}
+
+	if user.Email != "" {
+		if !isEmailValid(user.Email) {
+			responsesMap["email"] = "Please specify correct email format"
+		}
 	}
 
 	if user.Password == "" {
@@ -59,7 +78,7 @@ func RegisterHandlerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.FullName == "" {
-		responsesMap["fullName"] = "Password cannot be Empty"
+		responsesMap["fullName"] = "Fullname cannot be Empty"
 	}
 
 	if len(responsesMap) != 0 {
@@ -100,9 +119,6 @@ func RegisterHandlerPost(w http.ResponseWriter, r *http.Request) {
 			responsesMap["status"] = "true"
 		}
 	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	encodeResponses, _ := json.Marshal(responsesMap)
 	library.ResponseByCode(200, w, string(encodeResponses))

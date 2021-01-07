@@ -19,6 +19,8 @@ import (
 @access Public
 */
 func LoginHandlerGet(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+
 	response := models.BaseResponse{}
 	response.GetDefault("Login Api Ready")
 
@@ -112,9 +114,7 @@ func LoginHandlerPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-
+	library.SetDefaultHTTPHeader(w)
 	encodeResponses, _ := json.Marshal(responsesMap)
 	library.ResponseByCode(200, w, string(encodeResponses))
 }

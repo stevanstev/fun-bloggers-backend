@@ -11,6 +11,8 @@ import (
 */
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		library.SetDefaultHTTPHeader(w)
+
 		reqToken := r.Header.Get("x-auth-token")
 		reqPath := html.EscapeString(r.URL.Path)
 

@@ -19,21 +19,21 @@ func Routing() http.Handler {
 	router.HandleFunc("/", handler.IndexHandler).Methods("GET", "POST", "PUT", "DELETE")
 
 	// Register Routes
-	router.HandleFunc("/register", handler.RegisterHandlerGet).Methods("GET")
-	router.HandleFunc("/register", handler.RegisterHandlerPost).Methods("POST")
+	router.HandleFunc("/register", handler.RegisterHandlerGet).Methods("GET", "OPTIONS")
+	router.HandleFunc("/register", handler.RegisterHandlerPost).Methods("POST", "OPTIONS")
 
 	// Login Routes
-	router.HandleFunc("/login", handler.LoginHandlerPost).Methods("POST")
-	router.HandleFunc("/login", handler.LoginHandlerPost).Methods("GET")
+	router.HandleFunc("/login", handler.LoginHandlerGet).Methods("GET", "OPTIONS")
+	router.HandleFunc("/login", handler.LoginHandlerPost).Methods("POST", "OPTIONS")
 
 	// Blog Routes
-	router.HandleFunc("/blog", handler.BlogHandlerGet).Methods("GET")
-	router.HandleFunc("/blog", handler.BlogHandlerPost).Methods("POST")
+	router.HandleFunc("/blog", handler.BlogHandlerGet).Methods("GET", "OPTIONS")
+	router.HandleFunc("/blog", handler.BlogHandlerPost).Methods("POST", "OPTIONS")
 
 	// Relations Routes
-	router.HandleFunc("/relations", handler.RelationsHandlerGet).Methods("GET")
-	router.HandleFunc("/relations/followed", handler.RelationsFollowedHandlerGet).Methods("GET")
-	router.HandleFunc("/relations/blocked", handler.RelationsBlockedHandlerGet).Methods("GET")
+	router.HandleFunc("/relations", handler.RelationsHandlerGet).Methods("GET", "OPTIONS")
+	router.HandleFunc("/relations/followed", handler.RelationsFollowedHandlerGet).Methods("GET", "OPTIONS")
+	router.HandleFunc("/relations/blocked", handler.RelationsBlockedHandlerGet).Methods("GET", "OPTIONS")
 
 	return router
 }
