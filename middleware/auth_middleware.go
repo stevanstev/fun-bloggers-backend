@@ -1,9 +1,12 @@
 package middleware
 
 import (
+	driver "fun-blogger-backend/driver"
 	library "fun-blogger-backend/library"
 	"html"
 	"net/http"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 /*AuthMiddleware ...
@@ -18,16 +21,30 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		// Which path required to using auth middleware
 		var pathList = map[string]bool{
-			"/login":              false,
-			"/register":           false,
-			"/blog":               true,
-			"/relations":          true,
-			"/relations/followed": true,
+			"/login":               false,
+			"/register":            false,
+			"/":                    false,
+			"/blog":                true,
+			"/relations":           true,
+			"/relations/followed":  true,
+			"/relations/blocked":   true,
+			"/relations/followers": true,
+			"/relations/block":     true,
 		}
 
+		// token is set and the pathList is match
 		if reqToken == "" && pathList[reqPath] == true {
 			library.ResponseByCode(401, w, "Unauthorized")
 			return
+		}
+
+		if reqToken != "" {
+			// Avoid sending random token
+			userID := driver.GetUserIDByToken(reqToken)
+			if userID == primitive.NilObjectID {
+				library.ResponseByCode(401, w, "Unauthorized")
+				return
+			}
 		}
 
 		next.ServeHTTP(w, r)

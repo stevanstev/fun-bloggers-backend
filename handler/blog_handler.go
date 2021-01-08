@@ -48,7 +48,7 @@ func BlogHandlerGet(w http.ResponseWriter, r *http.Request) {
 */
 func BlogHandlerPost(w http.ResponseWriter, r *http.Request) {
 	library.SetDefaultHTTPHeader(w)
-	
+
 	var blog models.Blog
 	err := blog.FromJSON(r)
 
@@ -91,3 +91,5 @@ func BlogHandlerPost(w http.ResponseWriter, r *http.Request) {
 	encodeResponses, _ := json.Marshal(responsesMap)
 	library.ResponseByCode(200, w, string(encodeResponses))
 }
+
+//API FOR SEE UNREAD BLOG SEND BY USER EMAIL

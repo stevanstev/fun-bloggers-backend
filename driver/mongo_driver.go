@@ -2,6 +2,7 @@ package driver
 
 import (
 	"context"
+	"log"
 
 	models "fun-blogger-backend/model"
 
@@ -181,5 +182,80 @@ func GetUserIDByToken(token string) primitive.ObjectID {
 
 	result, _ := FindTokens(query)
 
+	if len(result) == 0 {
+		return primitive.NilObjectID
+	}
+
 	return result[0].UserID
+}
+
+/*UpdateRelations ...
+@desc update user by token query
+@param token, token header
+*/
+func UpdateRelations(collection string, where map[string]interface{}, updates map[string]interface{}) error {
+	db, err := connect()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	_, err = db.Collection(collection).UpdateOne(ctx, where, updates)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+/*GetListOfBlockedUsers ...
+@desc get list of blocked users
+@param query, find list of blocked users by query specified
+*/
+func GetListOfBlockedUsers(query map[string]interface{}) ([]models.User, error) {
+	var blockedUserResult []models.User
+
+	relationsResult, _ := FindRelations(query)
+
+	blockedUsers := relationsResult[0].BlockedList
+
+	if len(blockedUsers) == 0 {
+		return []models.User{}, nil
+	}
+
+	for i := 0; i < len(blockedUsers); i++ {
+		query := bson.M{
+			"userID": blockedUsers[i],
+		}
+		user, _ := FindUsers(query)
+		blockedUserResult = append(blockedUserResult, user[0])
+	}
+
+	return blockedUserResult, nil
+}
+
+/*GetListOfFollowedUsers ...
+@desc get list of followed users
+@param query, find list of followed users by query specified
+*/
+func GetListOfFollowedUsers(query map[string]interface{}) ([]models.User, error) {
+	var followedUserResult []models.User
+
+	relationsResult, _ := FindRelations(query)
+
+	followedUsers := relationsResult[0].FollowedList
+
+	if len(followedUsers) == 0 {
+		return []models.User{}, nil
+	}
+
+	for i := 0; i < len(followedUsers); i++ {
+		query := bson.M{
+			"userID": followedUsers[i],
+		}
+		user, _ := FindUsers(query)
+		followedUserResult = append(followedUserResult, user[0])
+	}
+
+	return followedUserResult, nil
 }
