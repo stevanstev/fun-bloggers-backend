@@ -6,9 +6,10 @@ import (
 	library "fun-blogger-backend/library"
 	models "fun-blogger-backend/model"
 	"net/http"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	// "fmt"
 )
 
 /*BlogHandlerGet ...
@@ -29,7 +30,51 @@ func BlogHandlerGet(w http.ResponseWriter, r *http.Request) {
 	blogs, _ := driver.FindBlogs(query)
 
 	if len(blogs) == 0 {
-		responsesMap["blogs"] = "Blogs is empty"
+		responsesMap["blogs"] = "0"
+	} else {
+		encodedBlogs, _ := json.Marshal(blogs)
+		responsesMap["blogs"] = string(encodedBlogs)
+	}
+
+	encodedResponses, _ := json.Marshal(responsesMap)
+
+	library.ResponseByCode(200, w, string(encodedResponses))
+}
+
+/*BlogHandlerGetAllPost ...
+@desc handling get request of /blog/all
+@route /blog/all
+@method POST
+@access Private
+*/
+func BlogHandlerGetAllPost(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+	var responsesMap = map[string]string{}
+
+	// HIDE BLOGS IF LOGGED IN USER IS BLOCKED BY THE AUTHOR
+	// reqToken := r.Header.Get("x-auth-token")
+
+	// userID := driver.GetUserIDByToken(reqToken)
+
+	// query := bson.M{
+	// 	"userID": userID,
+	// }
+
+	// userRelations, err := driver.FindRelations(query)
+
+	// if err != nil {
+	// 	library.ResponseByCode(500, w, err.Error())
+	// 	return
+	// }
+
+	// //FLAG FIXING HERE
+	// fmt.Println(userRelations)
+
+	query := bson.M{}
+	blogs, _ := driver.FindBlogs(query)
+
+	if len(blogs) == 0 {
+		responsesMap["blogs"] = "0"
 	} else {
 		encodedBlogs, _ := json.Marshal(blogs)
 		responsesMap["blogs"] = string(encodedBlogs)
@@ -68,7 +113,7 @@ func BlogHandlerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(responsesMap) != 0 {
-		responsesMap["status"] = "False"
+		responsesMap["status"] = "false"
 	} else {
 		reqToken := r.Header.Get("x-auth-token")
 		userID := driver.GetUserIDByToken(reqToken)

@@ -10,9 +10,22 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	// "reflect"
+	"fmt"
 )
 
 var ctx = context.Background()
+
+type blogResultType struct {
+	ID primitive.ObjectID `json:"_id"`
+	UserID primitive.ObjectID `json:"userID"`
+	Author string `json:"author"`
+	CreatedAt string `json:"createdAt"`
+	Title string `json:"title"`
+	Content string `json:"content"`
+}
+
 
 func connect() (*mongo.Database, error) {
 	clientOptions := options.Client()
@@ -83,7 +96,7 @@ func FindUsers(query map[string]interface{}) ([]models.User, error) {
 /*FindBlogs ...
 @param query bson.M{}
 */
-func FindBlogs(query map[string]interface{}) ([]models.Blog, error) {
+func FindBlogs(query map[string]interface{}) ([]blogResultType, error) {
 	db, err := connect()
 	if err != nil {
 		return nil, err
@@ -97,7 +110,7 @@ func FindBlogs(query map[string]interface{}) ([]models.Blog, error) {
 
 	defer cursor.Close(ctx)
 
-	result := make([]models.Blog, 0)
+	result := make([]blogResultType, 0)
 	for cursor.Next(ctx) {
 		var row models.Blog
 		err := cursor.Decode(&row)
@@ -105,7 +118,23 @@ func FindBlogs(query map[string]interface{}) ([]models.Blog, error) {
 			return nil, err
 		}
 
-		result = append(result, row)
+		query := bson.M{
+			"_id": row.UserID,
+		}
+
+		user , _ := FindUsers(query)
+
+		var blogResult blogResultType
+
+		blogResult.ID = row.ID
+		blogResult.UserID = row.UserID
+		blogResult.Author = user[0].Email
+		blogResult.CreatedAt = row.CreatedAt
+		blogResult.Title = row.Title
+		blogResult.Content = row.Content
+		blogResult.Content = row.Content
+
+		result = append(result, blogResult)
 	}
 
 	return result, nil
@@ -159,9 +188,11 @@ func FindRelations(query map[string]interface{}) ([]models.Relations, error) {
 
 	defer cursor.Close(ctx)
 
+	//FIXING {ObjectID("000000000000000000000000") ObjectID("000000000000000000000000") [] []  }
 	result := make([]models.Relations, 0)
 	for cursor.Next(ctx) {
 		var row models.Relations
+		fmt.Println(row)
 		err := cursor.Decode(&row)
 		if err != nil {
 			return nil, err
@@ -170,7 +201,30 @@ func FindRelations(query map[string]interface{}) ([]models.Relations, error) {
 		result = append(result, row)
 	}
 
+	// fmt.Println(reflect.TypeOf(result))
+
 	return result, nil
+}
+
+/*DeleteToken ...
+*/
+func DeleteToken(token string) (error) {
+	db, err := connect()
+	if err != nil {
+		return err
+	}
+
+	query := bson.M{
+		"token": token,
+	}
+
+	_ , err = db.Collection("tokens").DeleteOne(ctx, query)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 /*GetUserIDByToken ...
@@ -241,7 +295,11 @@ func GetListOfBlockedUsers(query map[string]interface{}) ([]models.User, error) 
 func GetListOfFollowedUsers(query map[string]interface{}) ([]models.User, error) {
 	var followedUserResult []models.User
 
-	relationsResult, _ := FindRelations(query)
+	relationsResult, err := FindRelations(query)
+
+	if err != nil {
+		return nil, err
+	}
 
 	followedUsers := relationsResult[0].FollowedList
 
@@ -251,7 +309,7 @@ func GetListOfFollowedUsers(query map[string]interface{}) ([]models.User, error)
 
 	for i := 0; i < len(followedUsers); i++ {
 		query := bson.M{
-			"userID": followedUsers[i],
+			"_id": followedUsers[i],
 		}
 		user, _ := FindUsers(query)
 		followedUserResult = append(followedUserResult, user[0])

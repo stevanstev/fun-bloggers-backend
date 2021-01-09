@@ -14,6 +14,7 @@ import (
 func ResponseByCode(errorCode int, w http.ResponseWriter, errorMessage string) {
 	switch errorCode {
 	case 200:
+		// w will be closing to avoid memory leaked
 		fmt.Fprint(w, errorMessage)
 	case 401:
 		fmt.Fprint(w, errorMessage)

@@ -110,6 +110,40 @@ func RelationsBlockedHandlerGet(w http.ResponseWriter, r *http.Request) {
 	library.ResponseByCode(200, w, string(encodeResponses))
 }
 
+func RelationsHandlerUserGet(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+
+	reqToken := r.Header.Get("x-auth-token")
+	userID := driver.GetUserIDByToken(reqToken)
+
+	var responsesMap = make(map[string]interface{}, 0)
+
+	query := bson.M{
+		"userID": userID,
+	}
+
+	relations , _ := driver.FindRelations(query)
+
+	if len(relations) != 0 {
+		followedUser := len(relations[0].FollowedList)
+		blockedUser := len(relations[0].BlockedList)
+
+		responsesMap["followedUser"] = followedUser
+		responsesMap["blockedUser"] = blockedUser
+
+		if followedUser == 0 {
+			responsesMap["followedUser"] = 0
+		}
+
+		if blockedUser == 0 {
+			responsesMap["blockedUser"] = 0
+		}
+	}
+
+	encodeResponses, _ := json.Marshal(responsesMap)
+	library.ResponseByCode(200, w, string(encodeResponses))
+}
+
 /*RelationsByEmailHandlerPost ...
 @desc handling post request of /relations/followers
 @route /relations/followers
@@ -136,7 +170,12 @@ func RelationsByEmailHandlerPost(w http.ResponseWriter, r *http.Request) {
 			"email": user.Email,
 		}
 
-		findUserByEmail, _ := driver.FindUsers(query)
+		findUserByEmail, err := driver.FindUsers(query)
+
+		if err != nil {
+			library.ResponseByCode(500, w, err.Error())
+			return
+		}
 
 		userID := findUserByEmail[0].ID
 
@@ -154,9 +193,9 @@ func RelationsByEmailHandlerPost(w http.ResponseWriter, r *http.Request) {
 		responsesMap["count"] = len(followedUsers)
 
 		if responsesMap["count"] == 0 {
-			responsesMap["followers"] = "This user does not follow anyone"
+			responsesMap["following"] = "User does not follow anyone"
 		} else {
-			responsesMap["followers"] = followedUsers
+			responsesMap["following"] = followedUsers
 		}
 
 		responsesMap["success"] = "true"
@@ -180,7 +219,7 @@ func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 	library.SetDefaultHTTPHeader(w)
 	type usersEmail struct {
 		UserEmail     string `json:"userEmail"`
-		FollowerEmail string `json:"followerEmail"`
+		BlockEmail string `json:"blockEmail"`
 	}
 
 	var emails usersEmail
@@ -198,8 +237,8 @@ func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 		responsesMap["userEmail"] = "User email cannot be empty"
 	}
 
-	if emails.FollowerEmail == "" {
-		responsesMap["followerEmail"] = "Follower email cannot be empty"
+	if emails.BlockEmail == "" {
+		responsesMap["blockEmail"] = "Block email cannot be empty"
 	}
 
 	if len(responsesMap) == 0 {
@@ -210,7 +249,7 @@ func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 					"email": emails.UserEmail,
 				},
 				bson.M{
-					"email": emails.FollowerEmail,
+					"email": emails.BlockEmail,
 				},
 			},
 		}
@@ -221,30 +260,42 @@ func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 		case 0:
 			responsesMap["emailErorr"] = "Email not found"
 		case 1:
-			responsesMap["emailErorr"] = "Either userEmail or followerEmail not found"
+			responsesMap["emailErorr"] = "Either userEmail or blockEmail not found"
 		default:
-			var userDetail models.User
-			var followerDetail models.User
+			var userDetails models.User
+			var blockUserDetails models.User
 
 			for i := 0; i < len(result); i++ {
 				if result[i].Email == emails.UserEmail {
-					userDetail = result[i]
+					userDetails = result[i]
 				} else {
-					followerDetail = result[i]
+					blockUserDetails = result[i]
 				}
 			}
 
 			// Add new blocked user to sender's list
 			query := bson.M{
-				"userID": userDetail.ID,
+				"userID": userDetails.ID,
 			}
 			userRelation, _ := driver.FindRelations(query)
 			blockedList := userRelation[0].BlockedList
-			blockedList = append(blockedList, followerDetail.ID)
+			blockedList = append(blockedList, blockUserDetails.ID)
 
-			query = bson.M{"$set": bson.M{"blockedList": blockedList}}
+			//Remove blocked user's id from sender followedlist 
+			followedList := userRelation[0].FollowedList 
+			var updatedFollowedList []primitive.ObjectID
 
-			where := bson.M{"userID": userDetail.ID}
+			for i := 0 ; i < len(followedList) ; i++ {
+				if followedList[i] == blockUserDetails.ID {
+					continue
+				}
+
+				updatedFollowedList = append(updatedFollowedList, followedList[i])
+			}
+
+			query = bson.M{"$set": bson.M{"blockedList": blockedList, "followedList": updatedFollowedList}}
+
+			where := bson.M{"userID": userDetails.ID}
 
 			err = driver.UpdateRelations("relations", where, query)
 
@@ -253,7 +304,40 @@ func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Remove followed user of target's account (if target already followed the sender)
+			// Remove user in blocked user's followed list where  user id equals to sender user id 
+			blockedUserID := blockUserDetails.ID
+
+			query = bson.M{
+				"userID": blockedUserID,
+			}
+
+			blockedUserRelations, _ := driver.FindRelations(query)
+
+			blockedUserFollowedList := blockedUserRelations[0].FollowedList
+			blockedUsrFolListLen := len(blockedUserFollowedList)
+			
+			var updateBlckdUsrFllwdList []primitive.ObjectID 
+
+			if blockedUsrFolListLen != 0 {
+				for i := 0 ; i < blockedUsrFolListLen ; i++ {
+					if blockedUserFollowedList[i] == userDetails.ID {
+						continue
+					}
+
+					updateBlckdUsrFllwdList = append(updateBlckdUsrFllwdList, blockedUserFollowedList[i])
+				}
+			}
+
+			query = bson.M{"$set": bson.M{"followedList": updateBlckdUsrFllwdList}}
+
+			where = bson.M{"userID": blockedUserID}
+
+			err = driver.UpdateRelations("relations", where, query)
+
+			if err != nil {
+				library.ResponseByCode(500, w, err.Error())
+				return
+			}
 
 			responsesMap["status"] = "true"
 		}
@@ -316,6 +400,53 @@ func RelationsFollowingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		responsesMap["status"] = "true"
+	}
+
+	encodeResponses, _ := json.Marshal(responsesMap)
+	library.ResponseByCode(200, w, string(encodeResponses))
+}
+
+func CheckIfUserAlreadyFollowedPost(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(w)
+
+	reqToken := r.Header.Get("x-auth-token")
+	var responsesMap = make(map[string]interface{}, 0)
+	userID := driver.GetUserIDByToken(reqToken)
+
+	query := bson.M{
+		"userID": userID,
+	}
+
+	userRelation, _ := driver.FindRelations(query)
+
+	var targetUser models.User 
+
+	targetUser.FromJSON(r)
+
+	if targetUser.ID == primitive.NilObjectID {
+		responsesMap["idError"] = "User ID is empty"
+	}
+
+	if len(responsesMap) != 0 {
+		responsesMap["status"] = "false"
+	} else {
+		isFollowed := "no"
+
+		if targetUser.ID == userRelation[0].UserID {
+			//Follow itself
+			isFollowed = "abort"
+		} else {
+			//do query
+			followedList := userRelation[0].FollowedList
+			for i:= 0 ; i < len(followedList) ; i ++ {
+				if targetUser.ID == followedList[i] {
+					isFollowed = "yes"
+					break
+				}
+			}
+		}
+
+		responsesMap["status"] = isFollowed
 	}
 
 	encodeResponses, _ := json.Marshal(responsesMap)

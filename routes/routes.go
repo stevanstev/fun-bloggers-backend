@@ -28,16 +28,27 @@ func Routing() http.Handler {
 
 	// Blog Routes
 	router.HandleFunc("/blog", handler.BlogHandlerGet).Methods("GET", "OPTIONS")
+	router.HandleFunc("/blog/all", handler.BlogHandlerGetAllPost).Methods("GET", "OPTIONS")
+
 	router.HandleFunc("/blog", handler.BlogHandlerPost).Methods("POST", "OPTIONS")
 
 	// Relations Routes
 	router.HandleFunc("/relations", handler.RelationsHandlerGet).Methods("GET", "OPTIONS")
 	router.HandleFunc("/relations/followed", handler.RelationsFollowedHandlerGet).Methods("GET", "OPTIONS")
 	router.HandleFunc("/relations/blocked", handler.RelationsBlockedHandlerGet).Methods("GET", "OPTIONS")
+	router.HandleFunc("/relations/user", handler.RelationsHandlerUserGet).Methods("GET", "OPTIONS")
+	router.HandleFunc("/relations/already-following", handler.CheckIfUserAlreadyFollowedPost).Methods("POST", "OPTIONS")
+
 	router.HandleFunc("/relations/followers", handler.RelationsByEmailHandlerPost).Methods("POST", "OPTIONS")
 	router.HandleFunc("/relations/block", handler.RelationsBlockingUserHandlerPost).Methods("POST", "OPTIONS")
 	router.HandleFunc("/relations/common", handler.FindCommonFollowersHandlerPost).Methods("POST", "OPTIONS")
 	router.HandleFunc("/relations/follow", handler.RelationsFollowingUserHandlerPost).Methods("POST", "OPTIONS")
+
+	router.HandleFunc("/token", handler.TokenHandlerDeletePost).Methods("GET", "OPTIONS")
+	
+	router.HandleFunc("/token/remove", handler.TokenHandlerDeletePost).Methods("POST", "OPTIONS")
+
+	router.HandleFunc("/user/details", handler.UserGetDetailsByToken).Methods("GET", "OPTIONS")
 
 	return router
 }

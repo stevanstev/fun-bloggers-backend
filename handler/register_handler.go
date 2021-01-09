@@ -105,12 +105,14 @@ func RegisterHandlerPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			emptyFollowedList := make([]primitive.ObjectID, 0)
+			emptyBlockedList := make([]primitive.ObjectID, 0)
 			// Create new relation data with empty FollowedList and BlockedList
 			var relations models.Relations
 			relations.ID = primitive.NewObjectID()
 			relations.UserID = user.ID
-			relations.FollowedList = []primitive.ObjectID{}
-			relations.BlockedList = []primitive.ObjectID{}
+			relations.FollowedList = emptyFollowedList
+			relations.BlockedList = emptyBlockedList
 			relations.CreatedAt = library.GetCurrentDate()
 			relations.UpdatedAt = library.GetCurrentDate()
 

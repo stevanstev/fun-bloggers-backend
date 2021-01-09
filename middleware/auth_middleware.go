@@ -30,6 +30,9 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			"/relations/blocked":   true,
 			"/relations/followers": true,
 			"/relations/block":     true,
+			"/token/remove":     true,
+			"/user/details":     true,
+			"/user":     true,
 		}
 
 		// token is set and the pathList is match
