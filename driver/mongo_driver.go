@@ -26,11 +26,19 @@ type blogResultType struct {
 
 func connect() (*mongo.Database, error) {
 	clientOptions := options.Client()
-	clientOptions.ApplyURI("mongodb://localhost:27017")
+	clientOptions.ApplyURI("mongodb+srv://d4rks0ul:b1nu$nw00L@funbloggers.waynb.mongodb.net/funBloggers?retryWrites=true&w=majority")
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		return nil, err
 	}
+
+	err = client.Ping(ctx, nil)
+
+	if err != nil {
+    	log.Fatal(err)
+	}
+
+	defer client.Disconnect(ctx)
 
 	err = client.Connect(ctx)
 	if err != nil {

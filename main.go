@@ -10,9 +10,9 @@ import (
 )
 
 func serve(mux http.Handler) {
-	fmt.Println("Server Running on Port: 8080")
-	// log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), mux))
-	log.Fatal(http.ListenAndServe(":8009", mux))
+	fmt.Println("Server Running")
+	log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), mux))
+	//log.Fatal(http.ListenAndServe(":8009", mux))
 }
 
 func main() {
