@@ -10,6 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"fmt"
 )
 
 var ctx = context.Background()
@@ -26,19 +28,17 @@ type blogResultType struct {
 
 func connect() (*mongo.Database, error) {
 	clientOptions := options.Client()
-	clientOptions.ApplyURI("mongodb+srv://d4rks0ul:b1nu$nw00L@funbloggers.waynb.mongodb.net/funBloggers?retryWrites=true&w=majority")
+	
+	password := "d4rks0ul"
+	username := "d4rks0ul"
+	dbName := "funBloggers"
+	uri := fmt.Sprintf("mongodb+srv://%s:%s@mycluster.waynb.mongodb.net/%s?retryWrites=true&w=majority", username, password, dbName)
+
+	clientOptions.ApplyURI(uri)
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		return nil, err
 	}
-
-	err = client.Ping(ctx, nil)
-
-	if err != nil {
-    	log.Fatal(err)
-	}
-
-	defer client.Disconnect(ctx)
 
 	err = client.Connect(ctx)
 	if err != nil {

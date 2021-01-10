@@ -12,7 +12,7 @@ import (
 func serve(mux http.Handler) {
 	fmt.Println("Server Running")
 	log.Fatal(http.ListenAndServe(":" + os.Getenv("PORT"), mux))
-	//log.Fatal(http.ListenAndServe(":8009", mux))
+	// log.Fatal(http.ListenAndServe(":8009", mux))
 }
 
 func main() {
