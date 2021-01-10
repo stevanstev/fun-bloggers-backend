@@ -8,7 +8,7 @@ import (
 )
 
 func TokenHandlerDeletePost(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	type tokenType struct {
 		Token string `json:"token"`

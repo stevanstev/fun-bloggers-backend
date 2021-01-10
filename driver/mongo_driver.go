@@ -10,9 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	// "reflect"
-	"fmt"
 )
 
 var ctx = context.Background()
@@ -188,11 +185,9 @@ func FindRelations(query map[string]interface{}) ([]models.Relations, error) {
 
 	defer cursor.Close(ctx)
 
-	//FIXING {ObjectID("000000000000000000000000") ObjectID("000000000000000000000000") [] []  }
 	result := make([]models.Relations, 0)
 	for cursor.Next(ctx) {
 		var row models.Relations
-		fmt.Println(row)
 		err := cursor.Decode(&row)
 		if err != nil {
 			return nil, err
@@ -200,8 +195,6 @@ func FindRelations(query map[string]interface{}) ([]models.Relations, error) {
 
 		result = append(result, row)
 	}
-
-	// fmt.Println(reflect.TypeOf(result))
 
 	return result, nil
 }

@@ -15,7 +15,7 @@ import (
 @access Public
 */
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	response := models.BaseResponse{}
 	response.GetDefault("Index Api Ready")

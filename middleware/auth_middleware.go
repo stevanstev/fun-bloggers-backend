@@ -14,25 +14,34 @@ import (
 */
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		library.SetDefaultHTTPHeader(w)
+		library.SetDefaultHTTPHeader(&w)
 
 		reqToken := r.Header.Get("x-auth-token")
+
 		reqPath := html.EscapeString(r.URL.Path)
 
 		// Which path required to using auth middleware
 		var pathList = map[string]bool{
-			"/login":               false,
-			"/register":            false,
-			"/":                    false,
-			"/blog":                true,
-			"/relations":           true,
-			"/relations/followed":  true,
-			"/relations/blocked":   true,
-			"/relations/followers": true,
-			"/relations/block":     true,
-			"/token/remove":     true,
-			"/user/details":     true,
-			"/user":     true,
+			"/login":                       false,
+			"/register":                    false,
+			"/":                            false,
+			"/blog":                        true,
+			"/blog/all":                    true,
+			"/relations":                   true,
+			"/relations/followed":          true,
+			"/relations/blocked":           true,
+			"/relations/user":              true,
+			"/relations/already-following": true,
+			"/relations/followers":         true,
+			"/relations/block":             true,
+			"/relations/common":            true,
+			"/relations/follow":            true,
+
+			"/token":        true,
+			"/token/remove": true,
+
+			"/user":         true,
+			"/user/details": true,
 		}
 
 		// token is set and the pathList is match

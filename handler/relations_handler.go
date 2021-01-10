@@ -18,7 +18,7 @@ import (
 @access Private
 */
 func RelationsHandlerGet(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	reqToken := r.Header.Get("x-auth-token")
 	userID := driver.GetUserIDByToken(reqToken)
@@ -47,7 +47,7 @@ func RelationsHandlerGet(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func RelationsFollowedHandlerGet(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	reqToken := r.Header.Get("x-auth-token")
 	userID := driver.GetUserIDByToken(reqToken)
@@ -82,7 +82,7 @@ func RelationsFollowedHandlerGet(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func RelationsBlockedHandlerGet(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	reqToken := r.Header.Get("x-auth-token")
 	userID := driver.GetUserIDByToken(reqToken)
@@ -111,7 +111,7 @@ func RelationsBlockedHandlerGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func RelationsHandlerUserGet(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	reqToken := r.Header.Get("x-auth-token")
 	userID := driver.GetUserIDByToken(reqToken)
@@ -151,7 +151,7 @@ func RelationsHandlerUserGet(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func RelationsByEmailHandlerPost(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	var responsesMap = make(map[string]interface{}, 0)
 	var user models.User
@@ -216,7 +216,7 @@ func RelationsByEmailHandlerPost(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 	type usersEmail struct {
 		UserEmail     string `json:"userEmail"`
 		BlockEmail string `json:"blockEmail"`
@@ -356,7 +356,7 @@ func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func RelationsFollowingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	var responsesMap = make(map[string]interface{}, 0)
 
@@ -407,7 +407,7 @@ func RelationsFollowingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func CheckIfUserAlreadyFollowedPost(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	reqToken := r.Header.Get("x-auth-token")
 	var responsesMap = make(map[string]interface{}, 0)
@@ -460,7 +460,7 @@ func CheckIfUserAlreadyFollowedPost(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func FindCommonFollowersHandlerPost(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 	var responsesMap = make(map[string]interface{}, 0)
 
 	type listOfEmails struct {

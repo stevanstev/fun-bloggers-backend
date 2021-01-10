@@ -29,6 +29,7 @@ func Routing() http.Handler {
 	// Blog Routes
 	router.HandleFunc("/blog", handler.BlogHandlerGet).Methods("GET", "OPTIONS")
 	router.HandleFunc("/blog/all", handler.BlogHandlerGetAllPost).Methods("GET", "OPTIONS")
+	router.HandleFunc("/blog/followed", handler.BlogHandlerGetFollowedPost).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/blog", handler.BlogHandlerPost).Methods("POST", "OPTIONS")
 
@@ -43,8 +44,6 @@ func Routing() http.Handler {
 	router.HandleFunc("/relations/block", handler.RelationsBlockingUserHandlerPost).Methods("POST", "OPTIONS")
 	router.HandleFunc("/relations/common", handler.FindCommonFollowersHandlerPost).Methods("POST", "OPTIONS")
 	router.HandleFunc("/relations/follow", handler.RelationsFollowingUserHandlerPost).Methods("POST", "OPTIONS")
-
-	router.HandleFunc("/token", handler.TokenHandlerDeletePost).Methods("GET", "OPTIONS")
 	
 	router.HandleFunc("/token/remove", handler.TokenHandlerDeletePost).Methods("POST", "OPTIONS")
 

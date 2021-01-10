@@ -18,6 +18,8 @@ func ResponseByCode(errorCode int, w http.ResponseWriter, errorMessage string) {
 		fmt.Fprint(w, errorMessage)
 	case 401:
 		fmt.Fprint(w, errorMessage)
+		// to be fixing
+		// http.Error(w, errorMessage, http.StatusUnauthorized)
 	case 500:
 		http.Error(w, errorMessage, http.StatusInternalServerError)
 	default:

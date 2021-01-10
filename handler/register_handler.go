@@ -20,7 +20,7 @@ import (
 @access Public
 */
 func RegisterHandlerGet(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 	
 	response := models.BaseResponse{}
 	response.GetDefault("Register Api Ready")
@@ -42,7 +42,7 @@ func RegisterHandlerGet(w http.ResponseWriter, r *http.Request) {
 @access Public
 */
 func RegisterHandlerPost(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 	
 	var user models.User
 	err := user.FromJSON(r)

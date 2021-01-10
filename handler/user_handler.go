@@ -15,7 +15,7 @@ import (
 @access Private
 */
 func UserGetDetailsByToken(w http.ResponseWriter, r * http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	reqToken := r.Header.Get("x-auth-token")
 	userID := driver.GetUserIDByToken(reqToken)

@@ -9,7 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	// "fmt"
+	"fmt"
+	// "reflect"
 )
 
 /*BlogHandlerGet ...
@@ -19,7 +20,7 @@ import (
 @access Private
 */
 func BlogHandlerGet(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	reqToken := r.Header.Get("x-auth-token")
 	var responsesMap = map[string]string{}
@@ -27,7 +28,103 @@ func BlogHandlerGet(w http.ResponseWriter, r *http.Request) {
 	userID := driver.GetUserIDByToken(reqToken)
 
 	query := bson.M{"userID": userID}
-	blogs, _ := driver.FindBlogs(query)
+	blogs, err := driver.FindBlogs(query)
+
+	if err != nil {
+		library.ResponseByCode(500, w, err.Error())
+		return
+	}
+
+	if len(blogs) == 0 {
+		responsesMap["blogs"] = "0"
+	} else {
+		encodedBlogs, _ := json.Marshal(blogs)
+		responsesMap["blogs"] = string(encodedBlogs)
+	}
+
+	encodedResponses, err := json.Marshal(responsesMap)
+
+	if err != nil {
+		library.ResponseByCode(500, w, err.Error())
+		return
+	}
+
+	library.ResponseByCode(200, w, string(encodedResponses))
+}
+
+/*BlogHandlerGetAllPost ...
+@desc handling get request of /blog/all
+@route /blog/all
+@method POST
+@access Private
+*/
+func BlogHandlerGetAllPost(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(&w)
+	var responsesMap = map[string]string{}
+
+	// HIDE BLOGS IF LOGGED IN USER IS BLOCKED BY THE AUTHOR
+	reqToken := r.Header.Get("x-auth-token")
+
+	userID := driver.GetUserIDByToken(reqToken)
+
+	query := bson.M{
+		"userID": userID,
+	}
+
+	loggedInUserRelations, err := driver.FindRelations(query)
+
+	if err != nil {
+		fmt.Println(err)
+		library.ResponseByCode(500, w, err.Error())
+		return
+	}
+
+	query = bson.M{
+		"userID": bson.M{
+			"$ne": userID,
+		},
+	}
+
+	allRelations, err := driver.FindRelations(query)
+	
+	if err != nil {
+		fmt.Println(err)
+		library.ResponseByCode(500, w, err.Error())
+		return
+	}
+
+	var listOfAllowSeeBlogs = make([]primitive.ObjectID, 0)
+	onBlockedList := false
+
+	for _, v := range allRelations {
+		if len(v.BlockedList) == 0 {
+			listOfAllowSeeBlogs = append(listOfAllowSeeBlogs, v.UserID)
+			continue
+		}
+
+		for _, id := range v.BlockedList {
+			if id == userID {
+				onBlockedList = true
+				break
+			}
+		}
+
+		if onBlockedList == false {
+			listOfAllowSeeBlogs = append(listOfAllowSeeBlogs, v.UserID)
+			onBlockedList = false
+		}
+	}
+
+	loggedInUserRelations[0].BlockedList = append(loggedInUserRelations[0].BlockedList, loggedInUserRelations[0].FollowedList...)
+
+	querySet := bson.M{
+		"userID": bson.M{
+			"$in": listOfAllowSeeBlogs,
+			"$nin": loggedInUserRelations[0].BlockedList,
+		},
+	}
+
+	blogs, _ := driver.FindBlogs(querySet)
 
 	if len(blogs) == 0 {
 		responsesMap["blogs"] = "0"
@@ -41,37 +138,45 @@ func BlogHandlerGet(w http.ResponseWriter, r *http.Request) {
 	library.ResponseByCode(200, w, string(encodedResponses))
 }
 
-/*BlogHandlerGetAllPost ...
-@desc handling get request of /blog/all
-@route /blog/all
+/*BlogHandlerGetFollowedPost ...
+@desc handling get request of /blog/followed
+@route /blog/followed
 @method POST
 @access Private
 */
-func BlogHandlerGetAllPost(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+func BlogHandlerGetFollowedPost(w http.ResponseWriter, r *http.Request) {
+	library.SetDefaultHTTPHeader(&w)
 	var responsesMap = map[string]string{}
 
 	// HIDE BLOGS IF LOGGED IN USER IS BLOCKED BY THE AUTHOR
-	// reqToken := r.Header.Get("x-auth-token")
+	reqToken := r.Header.Get("x-auth-token")
 
-	// userID := driver.GetUserIDByToken(reqToken)
+	userID := driver.GetUserIDByToken(reqToken)
 
-	// query := bson.M{
-	// 	"userID": userID,
-	// }
+	query := bson.M{
+		"userID": userID,
+	}
 
-	// userRelations, err := driver.FindRelations(query)
+	loggedInUserRelations, err := driver.FindRelations(query)
 
-	// if err != nil {
-	// 	library.ResponseByCode(500, w, err.Error())
-	// 	return
-	// }
+	if err != nil {
+		library.ResponseByCode(500, w, err.Error())
+		return
+	}
 
-	// //FLAG FIXING HERE
-	// fmt.Println(userRelations)
+	var loggedInUserFollowedList []primitive.ObjectID
 
-	query := bson.M{}
-	blogs, _ := driver.FindBlogs(query)
+	for  _, v := range loggedInUserRelations {
+		loggedInUserFollowedList = v.FollowedList
+	}
+
+	querySet := bson.M{
+		"userID": bson.M{
+			"$in": loggedInUserFollowedList,
+		},
+	}
+
+	blogs, _ := driver.FindBlogs(querySet)
 
 	if len(blogs) == 0 {
 		responsesMap["blogs"] = "0"
@@ -92,7 +197,7 @@ func BlogHandlerGetAllPost(w http.ResponseWriter, r *http.Request) {
 @access Private
 */
 func BlogHandlerPost(w http.ResponseWriter, r *http.Request) {
-	library.SetDefaultHTTPHeader(w)
+	library.SetDefaultHTTPHeader(&w)
 
 	var blog models.Blog
 	err := blog.FromJSON(r)
