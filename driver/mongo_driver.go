@@ -17,21 +17,20 @@ import (
 var ctx = context.Background()
 
 type blogResultType struct {
-	ID primitive.ObjectID `json:"_id"`
-	UserID primitive.ObjectID `json:"userID"`
-	Author string `json:"author"`
-	CreatedAt string `json:"createdAt"`
-	Title string `json:"title"`
-	Content string `json:"content"`
+	ID        primitive.ObjectID `json:"_id"`
+	UserID    primitive.ObjectID `json:"userID"`
+	Author    string             `json:"author"`
+	CreatedAt string             `json:"createdAt"`
+	Title     string             `json:"title"`
+	Content   string             `json:"content"`
 }
-
 
 func connect() (*mongo.Database, error) {
 	clientOptions := options.Client()
-	
-	password := "d4rks0ul"
-	username := "d4rks0ul"
-	dbName := "funBloggers"
+
+	password := "<PASSWORD>"
+	username := "<USERNAME>"
+	dbName := "<DBNAME>"
 	uri := fmt.Sprintf("mongodb+srv://%s:%s@mycluster.waynb.mongodb.net/%s?retryWrites=true&w=majority", username, password, dbName)
 
 	clientOptions.ApplyURI(uri)
@@ -127,7 +126,7 @@ func FindBlogs(query map[string]interface{}) ([]blogResultType, error) {
 			"_id": row.UserID,
 		}
 
-		user , _ := FindUsers(query)
+		user, _ := FindUsers(query)
 
 		var blogResult blogResultType
 
@@ -208,8 +207,8 @@ func FindRelations(query map[string]interface{}) ([]models.Relations, error) {
 }
 
 /*DeleteToken ...
-*/
-func DeleteToken(token string) (error) {
+ */
+func DeleteToken(token string) error {
 	db, err := connect()
 	if err != nil {
 		return err
@@ -219,7 +218,7 @@ func DeleteToken(token string) (error) {
 		"token": token,
 	}
 
-	_ , err = db.Collection("tokens").DeleteOne(ctx, query)
+	_, err = db.Collection("tokens").DeleteOne(ctx, query)
 
 	if err != nil {
 		return err

@@ -110,6 +110,12 @@ func RelationsBlockedHandlerGet(w http.ResponseWriter, r *http.Request) {
 	library.ResponseByCode(200, w, string(encodeResponses))
 }
 
+/*RelationsHandlerUserGet ...
+@desc handling post request of /relations/user
+@route /relations/user
+@method GET
+@access Private
+*/
 func RelationsHandlerUserGet(w http.ResponseWriter, r *http.Request) {
 	library.SetDefaultHTTPHeader(&w)
 
@@ -122,7 +128,7 @@ func RelationsHandlerUserGet(w http.ResponseWriter, r *http.Request) {
 		"userID": userID,
 	}
 
-	relations , _ := driver.FindRelations(query)
+	relations, _ := driver.FindRelations(query)
 
 	if len(relations) != 0 {
 		followedUser := len(relations[0].FollowedList)
@@ -218,7 +224,7 @@ func RelationsByEmailHandlerPost(w http.ResponseWriter, r *http.Request) {
 func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 	library.SetDefaultHTTPHeader(&w)
 	type usersEmail struct {
-		UserEmail     string `json:"userEmail"`
+		UserEmail  string `json:"userEmail"`
 		BlockEmail string `json:"blockEmail"`
 	}
 
@@ -281,11 +287,11 @@ func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 			blockedList := userRelation[0].BlockedList
 			blockedList = append(blockedList, blockUserDetails.ID)
 
-			//Remove blocked user's id from sender followedlist 
-			followedList := userRelation[0].FollowedList 
+			//Remove blocked user's id from sender followedlist
+			followedList := userRelation[0].FollowedList
 			var updatedFollowedList []primitive.ObjectID
 
-			for i := 0 ; i < len(followedList) ; i++ {
+			for i := 0; i < len(followedList); i++ {
 				if followedList[i] == blockUserDetails.ID {
 					continue
 				}
@@ -304,7 +310,7 @@ func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Remove user in blocked user's followed list where  user id equals to sender user id 
+			// Remove user in blocked user's followed list where  user id equals to sender user id
 			blockedUserID := blockUserDetails.ID
 
 			query = bson.M{
@@ -315,11 +321,11 @@ func RelationsBlockingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 
 			blockedUserFollowedList := blockedUserRelations[0].FollowedList
 			blockedUsrFolListLen := len(blockedUserFollowedList)
-			
-			var updateBlckdUsrFllwdList []primitive.ObjectID 
+
+			var updateBlckdUsrFllwdList []primitive.ObjectID
 
 			if blockedUsrFolListLen != 0 {
-				for i := 0 ; i < blockedUsrFolListLen ; i++ {
+				for i := 0; i < blockedUsrFolListLen; i++ {
 					if blockedUserFollowedList[i] == userDetails.ID {
 						continue
 					}
@@ -406,6 +412,12 @@ func RelationsFollowingUserHandlerPost(w http.ResponseWriter, r *http.Request) {
 	library.ResponseByCode(200, w, string(encodeResponses))
 }
 
+/*CheckIfUserAlreadyFollowedPost ...
+@desc handling post request of /relations/already-following
+@route /relations/already-following
+@method POST
+@access Private
+*/
 func CheckIfUserAlreadyFollowedPost(w http.ResponseWriter, r *http.Request) {
 	library.SetDefaultHTTPHeader(&w)
 
@@ -419,7 +431,7 @@ func CheckIfUserAlreadyFollowedPost(w http.ResponseWriter, r *http.Request) {
 
 	userRelation, _ := driver.FindRelations(query)
 
-	var targetUser models.User 
+	var targetUser models.User
 
 	targetUser.FromJSON(r)
 
@@ -438,7 +450,7 @@ func CheckIfUserAlreadyFollowedPost(w http.ResponseWriter, r *http.Request) {
 		} else {
 			//do query
 			followedList := userRelation[0].FollowedList
-			for i:= 0 ; i < len(followedList) ; i ++ {
+			for i := 0; i < len(followedList); i++ {
 				if targetUser.ID == followedList[i] {
 					isFollowed = "yes"
 					break

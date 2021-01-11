@@ -1,12 +1,18 @@
-package handler 
+package handler
 
 import (
-	"net/http"
-	library "fun-blogger-backend/library"
-	driver "fun-blogger-backend/driver"
 	"encoding/json"
+	driver "fun-blogger-backend/driver"
+	library "fun-blogger-backend/library"
+	"net/http"
 )
 
+/*TokenHandlerDeletePost ...
+@desc handling post request of /token/remove
+@route /token/remove
+@method POST
+@access Private
+*/
 func TokenHandlerDeletePost(w http.ResponseWriter, r *http.Request) {
 	library.SetDefaultHTTPHeader(&w)
 
@@ -14,7 +20,7 @@ func TokenHandlerDeletePost(w http.ResponseWriter, r *http.Request) {
 		Token string `json:"token"`
 	}
 
-	var tokenString tokenType;
+	var tokenString tokenType
 	var responsesMap = make(map[string]interface{}, 0)
 
 	decoder := json.NewDecoder(r.Body)
